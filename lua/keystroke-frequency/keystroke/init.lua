@@ -25,6 +25,7 @@ function Keystroke:incfreq(key)
 end
 
 function Keystroke:calcstat()
+	Keystroke.statistics = {}
 	local keystroke_sum = 0
 
 	for k, v in pairs(Keystroke.frequency) do
