@@ -85,7 +85,7 @@ function Keystroke:export()
 	Keystroke:calcstat()
 
 	local output = {
-		"| rank | Command | Count | % of Total | % of None Data Entry |",
+		"| Rank | Command | Count | % of Total | % of None Data Entry |",
 		"| ---: | ------: | ----: | ---------: | -------------------: |",
 	}
 	for rank, stat in pairs(Keystroke.statistics) do
