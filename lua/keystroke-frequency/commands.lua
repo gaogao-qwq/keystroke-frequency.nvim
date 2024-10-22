@@ -8,6 +8,7 @@ M.commands = {}
 M.setup = function()
 	M.commands = {
 		stats = function()
+			Keystroke:save()
 			local filepath = Keystroke:export()
 			if filepath:len() == 0 then
 				return
