@@ -93,7 +93,7 @@ function Keystroke:export()
 			"| ",
 			tostring(rank),
 			" | ",
-			stat.key,
+			stat.key == "char" and "insert char" or stat.key,
 			" | ",
 			tostring(stat.count),
 			" | ",
