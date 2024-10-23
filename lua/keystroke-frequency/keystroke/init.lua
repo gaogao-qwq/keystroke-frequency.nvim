@@ -46,41 +46,57 @@ function Keystroke:calcstat()
 end
 
 -- Load keystroke frequency from file
+---@return table<string, integer>
 function Keystroke:load()
+	local tbl = {}
 	local state_path = vim.fn.stdpath("state")
 	local file = io.open(state_path .. "/keystroke-frequency.log", "r+")
+
 	if file == nil then
-		return
+		return tbl
 	end
+
 	for line in file:lines("*l") do
 		if type(line) ~= "string" then
 			goto continue
 		end
 		local k, v = string.match(line, "(%w+)=(%d+)")
 		if k and v then
-			Keystroke.frequency[tostring(k)] = tonumber(v)
+			tbl[tostring(k)] = tonumber(v)
 		end
 		::continue::
 	end
+
+	file:close()
+	return tbl
 end
 
 -- Save keystroke frequency to file
 function Keystroke:save()
+	local tbl = Keystroke:load()
 	local state_path = vim.fn.stdpath("state")
 	local file = io.open(state_path .. "/keystroke-frequency.log", "w+")
+
 	if file == nil then
 		return
 	end
-	local str = ""
+
+	-- merge frequency table with given table
 	for k, v in pairs(Keystroke.frequency) do
-		str = str .. string.format("%s=%d\n", k, v)
+		tbl[k] = (tbl[k] or 0) + v
 	end
-	file:write(str)
+
+	local strtbl = {}
+	for k, v in pairs(tbl) do
+		table.insert(strtbl, string.format("%s=%d", k, v))
+	end
+
+	file:write(table.concat(strtbl, "\n"))
 	file:close()
 end
 
 -- Export keystroke frequency with additional statistics
----@return string
+---@return string filepath
 function Keystroke:export()
 	Keystroke:calcstat()
 

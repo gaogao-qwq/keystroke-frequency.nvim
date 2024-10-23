@@ -20,7 +20,7 @@ function M.setup()
 		group = augroup,
 		once = true,
 		callback = function()
-			Keystroke:load()
+			-- get showcmd message
 			---@diagnostic disable-next-line: redundant-parameter
 			vim.ui_attach(ns_showcmd, { ext_messages = true }, function(event, ...)
 				if event == "msg_showcmd" then
@@ -41,6 +41,7 @@ function M.setup()
 				end
 			end)
 
+			-- get keycode
 			vim.on_key(function(key, _)
 				for _, imode in ipairs(input_modes) do
 					if vim.api.nvim_get_mode().mode == imode then
