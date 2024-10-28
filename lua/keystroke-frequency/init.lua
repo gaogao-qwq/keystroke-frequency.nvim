@@ -37,7 +37,7 @@ function M.setup()
 						return
 					end
 
-					Keystroke:incfreq(showcmd_msg)
+					Keystroke:inccnt(showcmd_msg)
 				end
 			end)
 
@@ -46,7 +46,7 @@ function M.setup()
 				for _, imode in ipairs(input_modes) do
 					if vim.api.nvim_get_mode().mode == imode then
 						if key:len() == 1 or #vim.str_utf_pos(key) == 1 then
-							Keystroke:incfreq("char")
+							Keystroke:inccnt("char")
 						end
 						break
 					end

@@ -1,11 +1,17 @@
-local Frequency = require("keystroke-frequency.keystroke.frequency")
-
----@class Keystroke
----@field frequency table<string, integer>
----@field statistics KeyStorkeStatistics[]
 local Keystroke = {}
 
-Keystroke.frequency = Frequency
+---@type table<string, integer>
+local currcnt = {}
+
+-- increse count of given key
+---@param key string
+function Keystroke:inccnt(key)
+	if currcnt[key] == nil then
+		currcnt[key] = 1
+	else
+		currcnt[key] = currcnt[key] + 1
+	end
+end
 
 ---@class KeyStorkeStatistics
 ---@field key string
@@ -13,39 +19,37 @@ Keystroke.frequency = Frequency
 ---@field percentage_of_total number
 ---@field percentage_of_none_input number
 
-Keystroke.statistics = {}
-
----@param key string
-function Keystroke:incfreq(key)
-	if Keystroke.frequency[key] == nil then
-		Keystroke.frequency[key] = 1
-	else
-		Keystroke.frequency[key] = Keystroke.frequency[key] + 1
-	end
-end
-
+-- calculate statistics
+---@return KeyStorkeStatistics[]
 function Keystroke:calcstat()
-	Keystroke.statistics = {}
-	local keystroke_sum = 0
+	local statistics = {}
+	local sum = 0
+	local mergecnt = Keystroke:load()
 
-	for k, v in pairs(Keystroke.frequency) do
-		keystroke_sum = keystroke_sum + v
-		table.insert(Keystroke.statistics, { key = k, count = v })
+	-- merge frequency table with current count
+	for k, v in pairs(currcnt) do
+		mergecnt[k] = (mergecnt[k] or 0) + v
 	end
 
-	table.sort(Keystroke.statistics, function(a, b)
+	for k, v in pairs(mergecnt) do
+		sum = sum + mergecnt[k]
+		table.insert(statistics, { key = k, count = v, percentage_of_total = 0, percentage_of_none_input = 0 })
+	end
+
+	table.sort(statistics, function(a, b)
 		return a.count > b.count
 	end)
 
-	for _, stat in pairs(Keystroke.statistics) do
-		stat.percentage_of_total = stat.count / keystroke_sum
+	for _, stat in ipairs(statistics) do
+		stat.percentage_of_total = stat.count / sum
 		if stat.key ~= "char" then
-			stat.percentage_of_none_input = stat.count / (keystroke_sum - Keystroke.frequency["char"])
+			stat.percentage_of_none_input = stat.count / (sum - mergecnt["char"])
 		end
 	end
+	return statistics
 end
 
--- Load keystroke frequency from file
+-- Load keystroke count from file
 ---@return table<string, integer>
 function Keystroke:load()
 	local tbl = {}
@@ -71,7 +75,7 @@ function Keystroke:load()
 	return tbl
 end
 
--- Save keystroke frequency to file
+-- Save keystroke count to file
 function Keystroke:save()
 	local tbl = Keystroke:load()
 	local state_path = vim.fn.stdpath("state")
@@ -81,10 +85,11 @@ function Keystroke:save()
 		return
 	end
 
-	-- merge frequency table with given table
-	for k, v in pairs(Keystroke.frequency) do
+	-- merge frequency table with current count
+	for k, v in pairs(currcnt) do
 		tbl[k] = (tbl[k] or 0) + v
 	end
+	currcnt = {}
 
 	local strtbl = {}
 	for k, v in pairs(tbl) do
@@ -95,16 +100,16 @@ function Keystroke:save()
 	file:close()
 end
 
--- Export keystroke frequency with additional statistics
+-- Export keystroke frequency statistics
 ---@return string filepath
 function Keystroke:export()
-	Keystroke:calcstat()
+	local statistics = Keystroke:calcstat()
 
 	local output = {
 		"| Rank | Command | Count | % of Total | % of None Data Entry |",
 		"| ---: | ------: | ----: | ---------: | -------------------: |",
 	}
-	for rank, stat in pairs(Keystroke.statistics) do
+	for rank, stat in ipairs(statistics) do
 		local currrow = {
 			"| ",
 			tostring(rank),
@@ -138,7 +143,7 @@ end
 
 ---@param filepath string
 function Keystroke:preview_export_file(filepath)
-	vim.cmd("e" .. filepath)
+	vim.cmd("e " .. filepath)
 	local buf = vim.api.nvim_get_current_buf()
 	vim.api.nvim_set_option_value("readonly", true, { buf = buf })
 	vim.api.nvim_set_option_value("modified", false, { buf = buf })
