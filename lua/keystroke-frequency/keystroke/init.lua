@@ -33,7 +33,7 @@ function Keystroke:calcstat()
 
 	for k, v in pairs(mergecnt) do
 		sum = sum + mergecnt[k]
-		table.insert(statistics, { key = k, count = v, percentage_of_total = 0, percentage_of_none_input = 0 })
+		table.insert(statistics, { key = k, count = v })
 	end
 
 	table.sort(statistics, function(a, b)
