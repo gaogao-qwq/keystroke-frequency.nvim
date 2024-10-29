@@ -35,7 +35,7 @@ with a simple `:KeyFreqStats` command.
 
 ### What is None Data Entry?
 
-Every input key in [insert, replace, terminal mode](./keystroke-frequency/init.lua#16)
+Every input key in [insert, replace, terminal mode](./lua/keystroke-frequency/init.lua#16)
 will be treated as Data Entry. In contrast, any command that does not belong
 to the above mode and can be captured by [showcmd](https://neovim.io/doc/user/options.html#'showcmd')
 will be treated as None Data Entry.
